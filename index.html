@@ -1,357 +1,325 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Guest Check-In</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0a0a0a;--surface:#161616;--surface2:#1f1f1f;--border:#2b2b2b;
-  --gold:#c9a84c;--gold-dim:rgba(201,168,76,.2);
-  --text:#f0ede8;--muted:#777;
-  --green:#4caf7d;--green-dim:rgba(76,175,125,.12);
-  --red:#e05c5c;--blue:#5ba4e5;--rose:#e07fa0;--purple:#9b7fe8;
-  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
-}
-html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font)}
-body{padding-bottom:80px}
-#app{max-width:500px;margin:0 auto;padding:14px}
-
-/* header */
-.header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px}
-.header h1{font-size:20px;font-weight:600}
-.header p{font-size:12px;color:var(--muted);margin-top:2px}
-.live-badge{font-size:11px;font-weight:500;background:var(--gold-dim);color:var(--gold);border:1px solid rgba(201,168,76,.3);border-radius:20px;padding:4px 12px;letter-spacing:.04em}
-
-/* stats */
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
-.stat .n{font-size:22px;font-weight:600;color:var(--gold);line-height:1}
-.stat .l{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.07em}
-
-/* search */
-.search-wrap{position:relative;margin-bottom:12px}
-.search-wrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.35;pointer-events:none;font-size:16px}
-#search{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:13px 13px 13px 42px;font-size:16px;color:var(--text);font-family:var(--font);transition:border-color .2s;-webkit-appearance:none}
-#search::placeholder{color:var(--muted)}
-#search:focus{outline:none;border-color:var(--gold)}
-
-/* filters */
-.filters{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
-.filters::-webkit-scrollbar{display:none}
-.filter-btn{flex-shrink:0;font-size:12px;font-family:var(--font);padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s}
-.filter-btn.active{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
-
-/* results */
-.results-count{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding:0 2px;min-height:16px}
-.guest-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s,background .15s}
-.guest-card:hover{border-color:#3a3a3a;background:var(--surface2)}
-.guest-card.arrived{border-left:3px solid var(--green);background:rgba(76,175,125,.03)}
-.avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;text-transform:uppercase}
-.av-vvip{background:rgba(201,168,76,.15);color:var(--gold)}
-.av-vip{background:rgba(91,164,229,.12);color:var(--blue)}
-.av-bridesmaid{background:rgba(224,127,160,.12);color:var(--rose)}
-.av-groomsmen{background:rgba(155,127,232,.12);color:var(--purple)}
-.av-regular,.av-default{background:var(--surface2);color:var(--muted)}
-.guest-info{flex:1;min-width:0}
-.guest-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
-.guest-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.code-badge{font-size:11px;font-family:var(--mono);color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);border-radius:5px;padding:2px 7px}
-.group-badge{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500;letter-spacing:.03em}
-.gb-vvip{background:rgba(201,168,76,.12);color:var(--gold)}
-.gb-vip{background:rgba(91,164,229,.1);color:var(--blue)}
-.gb-bridesmaid{background:rgba(224,127,160,.1);color:var(--rose)}
-.gb-groomsmen{background:rgba(155,127,232,.1);color:var(--purple)}
-.gb-regular,.gb-default{background:var(--surface2);color:var(--muted)}
-.arrived-badge{font-size:10px;color:var(--green);background:var(--green-dim);border-radius:5px;padding:2px 7px;font-weight:500}
-.check-btn{flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted);transition:all .15s}
-.check-btn:hover{border-color:var(--green);color:var(--green)}
-.check-btn.done{background:var(--green);border-color:var(--green);color:#fff}
-.hl{background:rgba(201,168,76,.22);border-radius:3px;padding:0 2px}
-.empty{text-align:center;padding:50px 20px;color:var(--muted)}
-.empty .ico{font-size:36px;margin-bottom:12px}
-
-/* loading / error */
-#loading{text-align:center;padding:60px 20px;color:var(--muted)}
-#loading .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-@keyframes spin{to{transform:rotate(360deg)}}
-#error-msg{display:none;background:rgba(224,92,92,.1);border:1px solid rgba(224,92,92,.3);border-radius:10px;padding:16px;font-size:13px;color:var(--red);margin-top:12px;line-height:1.6}
-
-/* modal */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:flex-end;justify-content:center}
-.modal-bg.open{display:flex}
-.modal{background:var(--surface);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px}
-.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
-.modal-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;margin-bottom:12px;text-transform:uppercase}
-.modal h2{font-size:19px;font-weight:600;margin-bottom:4px}
-.modal-status{font-size:13px;margin-bottom:20px}
-.modal-fields{display:grid;gap:8px;margin-bottom:20px}
-.field-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:9px}
-.field-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
-.field-val{font-size:13px;font-weight:500;text-align:right;max-width:60%}
-.field-val.code{font-family:var(--mono);color:var(--gold)}
-.modal-actions{display:flex;gap:10px}
-.modal-actions button{flex:1;padding:13px;border-radius:10px;font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:none;transition:opacity .15s}
-.modal-actions button:hover{opacity:.85}
-.btn-close{background:var(--surface2);color:var(--text)}
-.btn-ci{background:var(--green);color:#fff}
-.btn-undo{background:var(--red);color:#fff}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Guest Check-In</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#0a0a0a;--surface:#161616;--surface2:#1f1f1f;--border:#2b2b2b;
+      --gold:#c9a84c;--gold-dim:rgba(201,168,76,.2);
+      --text:#f0ede8;--muted:#777;
+      --green:#4caf7d;--green-dim:rgba(76,175,125,.12);
+      --red:#e05c5c;--blue:#5ba4e5;--rose:#e07fa0;--purple:#9b7fe8;
+      --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+    }
+    html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--font)}
+    body{padding-bottom:80px}
+    #app{max-width:500px;margin:0 auto;padding:14px;display:none}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:20px 0 16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+    .header h1{font-size:20px;font-weight:600}
+    .header p{font-size:12px;color:var(--muted);margin-top:2px}
+    .sync-pill{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 10px}
+    .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--muted);transition:background .3s}
+    .sync-dot.live{background:var(--green);box-shadow:0 0 0 3px var(--green-dim)}
+    .sync-dot.error{background:var(--red)}
+    .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+    .stat{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px}
+    .stat .n{font-size:22px;font-weight:600;color:var(--gold);line-height:1}
+    .stat .l{font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:.07em}
+    .search-wrap{position:relative;margin-bottom:12px}
+    .search-wrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.35;pointer-events:none;font-size:16px}
+    #search{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:13px 13px 13px 42px;font-size:16px;color:var(--text);font-family:var(--font);transition:border-color .2s;-webkit-appearance:none}
+    #search::placeholder{color:var(--muted)}
+    #search:focus{outline:none;border-color:var(--gold)}
+    .filters{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+    .filters::-webkit-scrollbar{display:none}
+    .filter-btn{flex-shrink:0;font-size:12px;font-family:var(--font);padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s}
+    .filter-btn.active{border-color:var(--gold);background:var(--gold-dim);color:var(--gold)}
+    .results-count{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding:0 2px;min-height:16px}
+    .guest-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s,background .15s}
+    .guest-card:hover{border-color:#3a3a3a;background:var(--surface2)}
+    .guest-card.arrived{border-left:3px solid var(--green);background:rgba(76,175,125,.03)}
+    .avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0;text-transform:uppercase}
+    .av-vvip{background:rgba(201,168,76,.15);color:var(--gold)}
+    .av-vip{background:rgba(91,164,229,.12);color:var(--blue)}
+    .av-bridesmaid{background:rgba(224,127,160,.12);color:var(--rose)}
+    .av-groomsmen{background:rgba(155,127,232,.12);color:var(--purple)}
+    .av-default{background:var(--surface2);color:var(--muted)}
+    .guest-info{flex:1;min-width:0}
+    .guest-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+    .guest-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .code-badge{font-size:11px;font-family:var(--mono);color:var(--gold);background:var(--gold-dim);border:1px solid rgba(201,168,76,.2);border-radius:5px;padding:2px 7px}
+    .group-badge{font-size:10px;padding:2px 7px;border-radius:5px;font-weight:500}
+    .gb-vvip{background:rgba(201,168,76,.12);color:var(--gold)}
+    .gb-vip{background:rgba(91,164,229,.1);color:var(--blue)}
+    .gb-bridesmaid{background:rgba(224,127,160,.1);color:var(--rose)}
+    .gb-groomsmen{background:rgba(155,127,232,.1);color:var(--purple)}
+    .gb-default{background:var(--surface2);color:var(--muted)}
+    .arrived-badge{font-size:10px;color:var(--green);background:var(--green-dim);border-radius:5px;padding:2px 7px;font-weight:500}
+    .check-btn{flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--muted);transition:all .15s}
+    .check-btn:hover{border-color:var(--green);color:var(--green)}
+    .check-btn.done{background:var(--green);border-color:var(--green);color:#fff}
+    .hl{background:rgba(201,168,76,.22);border-radius:3px;padding:0 2px}
+    .empty{text-align:center;padding:50px 20px;color:var(--muted)}
+    .empty .ico{font-size:36px;margin-bottom:12px}
+    #loading{text-align:center;padding:60px 20px;color:var(--muted)}
+    #loading .spinner{width:32px;height:32px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:13px;color:var(--text);z-index:200;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+    .toast.show{opacity:1}
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:flex-end;justify-content:center}
+    .modal-bg.open{display:flex}
+    .modal{background:var(--surface);border-top:1px solid var(--border);border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:500px}
+    .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px}
+    .modal-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;margin-bottom:12px;text-transform:uppercase}
+    .modal h2{font-size:19px;font-weight:600;margin-bottom:4px}
+    .modal-status{font-size:13px;margin-bottom:20px}
+    .modal-fields{display:grid;gap:8px;margin-bottom:20px}
+    .field-row{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border-radius:9px}
+    .field-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    .field-val{font-size:13px;font-weight:500;text-align:right;max-width:60%}
+    .field-val.code{font-family:var(--mono);color:var(--gold)}
+    .modal-actions{display:flex;gap:10px}
+    .modal-actions button{flex:1;padding:13px;border-radius:10px;font-size:14px;font-weight:500;font-family:var(--font);cursor:pointer;border:none;transition:opacity .15s}
+    .modal-actions button:hover{opacity:.85}
+    .btn-close{background:var(--surface2);color:var(--text)}
+    .btn-ci{background:var(--green);color:#fff}
+    .btn-undo{background:var(--red);color:#fff}
+  </style>
 </head>
 <body>
 
-<div id="app" style="display:none">
-  <div class="header">
-    <div>
-      <h1>Guest Check-In</h1>
-      <p id="subtitle"></p>
-    </div>
-    <div class="live-badge">LIVE</div>
-  </div>
+  <div id="loading"><div class="spinner"></div><p>Loading…</p></div>
 
-  <div class="stats">
-    <div class="stat"><div class="n" id="sn-total">0</div><div class="l">Total</div></div>
-    <div class="stat"><div class="n" id="sn-arrived">0</div><div class="l">Arrived</div></div>
-    <div class="stat"><div class="n" id="sn-pending">0</div><div class="l">Pending</div></div>
-  </div>
-
-  <div class="search-wrap">
-    <span class="ico">🔍</span>
-    <input type="search" id="search" placeholder="Search name or invitation code…" autocomplete="off" autocorrect="off" spellcheck="false">
-  </div>
-
-  <div class="filters" id="filters"></div>
-  <div class="results-count" id="results-count"></div>
-  <div id="results"></div>
-</div>
-
-<div id="loading">
-  <div class="spinner"></div>
-  <p>Loading guest list…</p>
-</div>
-<div id="error-msg"></div>
-
-<div class="modal-bg" id="modal">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-avatar" id="m-av"></div>
-    <h2 id="m-name"></h2>
-    <div class="modal-status" id="m-status"></div>
-    <div class="modal-fields" id="m-fields"></div>
-    <div class="modal-actions">
-      <button class="btn-close" id="m-close">Close</button>
-      <button id="m-action"></button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ── Config ──────────────────────────────────────────────────
-// Change these to match your CSV column headers exactly
-const CONFIG = {
-  csvFile:   'guest-list.csv',   // CSV filename in the same folder
-  nameCol:   'full name',        // column for guest name
-  codeCol:   'Invitation Code',  // column for access/invitation code
-  groupCol:  'Group',            // column for group/category
-  rsvpCol:   'rsvp',             // column for RSVP status (optional)
-};
-// ────────────────────────────────────────────────────────────
-
-let GUESTS = [], checked = new Set(), currentIdx = -1, activeFilter = 'all';
-const $ = id => document.getElementById(id);
-
-// ── CSV Parser ───────────────────────────────────────────────
-function parseCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  if (!lines.length) return [];
-  const headers = parseCSVLine(lines[0]);
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const vals = parseCSVLine(lines[i]);
-    const row = {};
-    headers.forEach((h, j) => { row[h.trim()] = (vals[j] || '').trim(); });
-    rows.push(row);
-  }
-  return rows;
-}
-
-function parseCSVLine(line) {
-  const result = []; let cur = ''; let inQ = false;
-  for (let i = 0; i < line.length; i++) {
-    const c = line[i];
-    if (c === '"') { inQ = !inQ; continue; }
-    if (c === ',' && !inQ) { result.push(cur); cur = ''; continue; }
-    cur += c;
-  }
-  result.push(cur);
-  return result;
-}
-
-// ── Load CSV ─────────────────────────────────────────────────
-async function loadGuests() {
-  try {
-    const res = await fetch(CONFIG.csvFile + '?t=' + Date.now());
-    if (!res.ok) throw new Error(`Could not load "${CONFIG.csvFile}" (${res.status})`);
-    const text = await res.text();
-    const rows = parseCSV(text);
-    GUESTS = rows
-      .map(r => ({
-        name:  r[CONFIG.nameCol]  || '',
-        code:  r[CONFIG.codeCol]  || '',
-        group: r[CONFIG.groupCol] || '',
-        rsvp:  r[CONFIG.rsvpCol]  || '',
-        raw:   r,
-      }))
-      .filter(g => g.name && g.name !== '#REF!');
-    if (!GUESTS.length) throw new Error('No guests found. Check that column names match the CONFIG at the top of index.html.');
-    init();
-  } catch (e) {
-    $('loading').style.display = 'none';
-    const err = $('error-msg');
-    err.style.display = 'block';
-    err.innerHTML = `<strong>Could not load guest list</strong><br>${e.message}<br><br>
-      Make sure <code>guest-list.csv</code> is in the same folder as <code>index.html</code>,
-      and open the file via a local server (e.g. VS Code Live Server, or run:
-      <code>python3 -m http.server</code> in the folder).`;
-  }
-}
-
-// ── Init ─────────────────────────────────────────────────────
-function init() {
-  $('loading').style.display = 'none';
-  $('app').style.display = 'block';
-  $('subtitle').textContent = `${GUESTS.length} guests · tap to check in`;
-
-  // Build group filter buttons
-  const groups = ['all', ...new Set(GUESTS.map(g => g.group).filter(Boolean).sort()), 'not arrived'];
-  const filterEl = $('filters');
-  filterEl.innerHTML = groups.map(g =>
-    `<button class="filter-btn${g==='all'?' active':''}" data-g="${g}">${g === 'all' ? 'All' : g === 'not arrived' ? 'Not arrived' : g}</button>`
-  ).join('');
-  filterEl.onclick = e => {
-    const b = e.target.closest('.filter-btn');
-    if (!b) return;
-    document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    activeFilter = b.dataset.g;
-    render();
-  };
-
-  updateStats();
-  render();
-  $('search').oninput = render;
-}
-
-// ── Helpers ───────────────────────────────────────────────────
-function avClass(g) {
-  const k = (g || '').toLowerCase();
-  return k === 'vvip' ? 'av-vvip' : k === 'vip' ? 'av-vip' :
-         k === 'bridesmaid' ? 'av-bridesmaid' : k === 'groomsmen' ? 'av-groomsmen' : 'av-default';
-}
-function gbClass(g) {
-  const k = (g || '').toLowerCase();
-  return k === 'vvip' ? 'gb-vvip' : k === 'vip' ? 'gb-vip' :
-         k === 'bridesmaid' ? 'gb-bridesmaid' : k === 'groomsmen' ? 'gb-groomsmen' : 'gb-default';
-}
-function initials(n) {
-  return n.split(' ').map(w => w[0] || '').filter(Boolean).slice(0, 2).join('').toUpperCase() || '?';
-}
-function hl(s, q) {
-  if (!q) return s;
-  const e = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return String(s).replace(new RegExp(e, 'gi'), m => `<span class="hl">${m}</span>`);
-}
-function updateStats() {
-  $('sn-total').textContent   = GUESTS.length;
-  $('sn-arrived').textContent = checked.size;
-  $('sn-pending').textContent = GUESTS.length - checked.size;
-}
-
-// ── Render ────────────────────────────────────────────────────
-function render() {
-  const q = $('search').value.trim().toLowerCase();
-  let list = GUESTS.map((g, i) => ({ g, i }));
-
-  if (activeFilter === 'not arrived') list = list.filter(({ i }) => !checked.has(i));
-  else if (activeFilter !== 'all') list = list.filter(({ g }) => (g.group || '').toLowerCase() === activeFilter.toLowerCase());
-
-  if (q) list = list.filter(({ g }) =>
-    g.name.toLowerCase().includes(q) || g.code.toLowerCase().includes(q)
-  );
-
-  $('results-count').textContent = list.length ? `${list.length} guest${list.length !== 1 ? 's' : ''}` : '';
-
-  const el = $('results');
-  if (!list.length) {
-    el.innerHTML = `<div class="empty"><div class="ico">${q ? '🔎' : '👥'}</div>
-      <p>${q ? `No match for "${q}"` : 'No guests in this group'}</p></div>`;
-    return;
-  }
-
-  el.innerHTML = list.map(({ g, i }) => {
-    const ci = checked.has(i);
-    return `<div class="guest-card${ci ? ' arrived' : ''}" onclick="openModal(${i})">
-      <div class="avatar ${avClass(g.group)}">${initials(g.name)}</div>
-      <div class="guest-info">
-        <div class="guest-name">${hl(g.name, q)}</div>
-        <div class="guest-meta">
-          ${g.code ? `<span class="code-badge">${hl(g.code, q)}</span>` : ''}
-          ${g.group ? `<span class="group-badge ${gbClass(g.group)}">${g.group}</span>` : ''}
-          ${ci ? `<span class="arrived-badge">✓ arrived</span>` : ''}
-        </div>
+  <div id="app">
+    <div class="header">
+      <div>
+        <h1>Guest Check-In</h1>
+        <p id="subtitle"></p>
       </div>
-      <button class="check-btn${ci ? ' done' : ''}" onclick="toggle(event,${i})">✓</button>
-    </div>`;
-  }).join('');
-}
+      <div class="sync-pill">
+        <span class="sync-dot" id="sync-dot"></span>
+        <span id="sync-text">Connecting</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="n" id="sn-total">0</div><div class="l">Total</div></div>
+      <div class="stat"><div class="n" id="sn-arrived">0</div><div class="l">Arrived</div></div>
+      <div class="stat"><div class="n" id="sn-pending">0</div><div class="l">Pending</div></div>
+    </div>
+    <div class="search-wrap">
+      <span class="ico">🔍</span>
+      <input type="search" id="search" placeholder="Search name or invitation code…" autocomplete="off" autocorrect="off" spellcheck="false">
+    </div>
+    <div class="filters" id="filters"></div>
+    <div class="results-count" id="results-count"></div>
+    <div id="results"></div>
+  </div>
 
-// ── Check in ──────────────────────────────────────────────────
-function toggle(e, i) {
-  e.stopPropagation();
-  checked.has(i) ? checked.delete(i) : checked.add(i);
-  updateStats();
-  render();
-}
+  <div class="modal-bg" id="modal">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div class="modal-avatar" id="m-av"></div>
+      <h2 id="m-name"></h2>
+      <div class="modal-status" id="m-status"></div>
+      <div class="modal-fields" id="m-fields"></div>
+      <div class="modal-actions">
+        <button class="btn-close" id="m-close">Close</button>
+        <button id="m-action"></button>
+      </div>
+    </div>
+  </div>
 
-// ── Modal ──────────────────────────────────────────────────────
-function openModal(i) {
-  const g = GUESTS[i]; currentIdx = i;
-  const ci = checked.has(i);
-  const av = $('m-av');
-  av.textContent  = initials(g.name);
-  av.className    = 'modal-avatar ' + avClass(g.group);
-  $('m-name').textContent = g.name;
-  $('m-status').textContent = ci ? '✓ Checked in — arrived' : 'Not yet checked in';
-  $('m-status').style.color = ci ? 'var(--green)' : 'var(--muted)';
+  <div class="toast" id="toast"></div>
 
-  // Show all non-empty fields from the raw CSV row
-  const skip = [CONFIG.nameCol];
-  const fields = Object.entries(g.raw)
-    .filter(([k, v]) => !skip.includes(k) && v && v !== '#REF!')
-    .map(([k, v]) => `<div class="field-row">
-      <span class="field-label">${k}</span>
-      <span class="field-val${k === CONFIG.codeCol ? ' code' : ''}">${v}</span>
-    </div>`).join('');
+  <script>
+    const CONFIG = {
+      csvFile:  'guest-list.csv',
+      nameCol:  'full name',
+      codeCol:  'Invitation Code',
+      groupCol: 'Group',
+      rsvpCol:  'rsvp',
+    };
 
-  $('m-fields').innerHTML = fields;
-  const btn = $('m-action');
-  btn.textContent = ci ? '✕ Undo check-in' : '✓ Check in';
-  btn.className   = ci ? 'btn-undo' : 'btn-ci';
-  $('modal').classList.add('open');
-}
+    let GUESTS = [], checkins = {}, currentIdx = -1, activeFilter = 'all';
+    let ws, reconnectTimer;
+    const $ = id => document.getElementById(id);
 
-$('m-close').onclick   = () => $('modal').classList.remove('open');
-$('modal').onclick     = e  => { if (e.target === $('modal')) $('modal').classList.remove('open'); };
-$('m-action').onclick  = () => {
-  checked.has(currentIdx) ? checked.delete(currentIdx) : checked.add(currentIdx);
-  updateStats(); render();
-  $('modal').classList.remove('open');
-};
+    // ── WebSocket ────────────────────────────────────────────────
+    function connect() {
+      const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+      ws = new WebSocket(`${proto}://${location.host}`);
 
-loadGuests();
-</script>
+      ws.onopen = () => setSyncStatus('live');
+
+      ws.onmessage = ({ data }) => {
+        const msg = JSON.parse(data);
+        if (msg.type === 'init') {
+          checkins = msg.checkins || {};
+          // CSV may not be loaded yet — init will call render when ready
+          if (GUESTS.length) { updateStats(); render(); }
+        }
+        if (msg.type === 'checkin') {
+          checkins[msg.idx] = { ts: Date.now() };
+          updateStats(); render();
+        }
+        if (msg.type === 'undo') {
+          delete checkins[msg.idx];
+          updateStats(); render();
+        }
+      };
+
+      ws.onclose = () => {
+        setSyncStatus('error');
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+
+      ws.onerror = () => ws.close();
+    }
+
+    function send(msg) {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg));
+    }
+
+    function setSyncStatus(state) {
+      const dot = $('sync-dot'), txt = $('sync-text');
+      dot.className = 'sync-dot ' + state;
+      txt.textContent = state === 'live' ? 'Live' : 'Reconnecting…';
+    }
+
+    // ── CSV ──────────────────────────────────────────────────────
+    async function loadCSV() {
+      const res  = await fetch(CONFIG.csvFile + '?t=' + Date.now());
+      const text = await res.text();
+      GUESTS = parseCSV(text)
+        .map(r => ({ name: r[CONFIG.nameCol]||'', code: r[CONFIG.codeCol]||'', group: r[CONFIG.groupCol]||'', rsvp: r[CONFIG.rsvpCol]||'', raw: r }))
+        .filter(g => g.name && g.name !== '#REF!');
+    }
+
+    function parseCSV(text) {
+      const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+      const headers = parseLine(lines[0]);
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = parseLine(lines[i]), row = {};
+        headers.forEach((h,j) => row[h.trim()] = (vals[j]||'').trim());
+        rows.push(row);
+      }
+      return rows;
+    }
+    function parseLine(line) {
+      const out=[]; let cur='', inQ=false;
+      for (const c of line) {
+        if (c==='"'){inQ=!inQ;continue;}
+        if (c===','&&!inQ){out.push(cur);cur='';continue;}
+        cur+=c;
+      }
+      out.push(cur); return out;
+    }
+
+    // ── Boot ─────────────────────────────────────────────────────
+    async function boot() {
+      connect();
+      await loadCSV();
+      $('loading').style.display = 'none';
+      $('app').style.display     = 'block';
+      $('subtitle').textContent  = `${GUESTS.length} guests · tap to check in`;
+
+      const groups = ['all', ...new Set(GUESTS.map(g=>g.group).filter(Boolean).sort()), 'not arrived'];
+      $('filters').innerHTML = groups.map(g =>
+        `<button class="filter-btn${g==='all'?' active':''}" data-g="${g}">${g==='all'?'All':g==='not arrived'?'Not arrived':g}</button>`
+      ).join('');
+      $('filters').onclick = e => {
+        const b = e.target.closest('.filter-btn'); if (!b) return;
+        document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active'); activeFilter = b.dataset.g; render();
+      };
+      $('search').oninput = render;
+      updateStats(); render();
+    }
+
+    // ── Helpers ──────────────────────────────────────────────────
+    const isArrived = i => !!checkins[i];
+    function avClass(g){const k=(g||'').toLowerCase();return k==='vvip'?'av-vvip':k==='vip'?'av-vip':k==='bridesmaid'?'av-bridesmaid':k==='groomsmen'?'av-groomsmen':'av-default'}
+    function gbClass(g){const k=(g||'').toLowerCase();return k==='vvip'?'gb-vvip':k==='vip'?'gb-vip':k==='bridesmaid'?'gb-bridesmaid':k==='groomsmen'?'gb-groomsmen':'gb-default'}
+    function initials(n){return n.split(' ').map(w=>w[0]||'').filter(Boolean).slice(0,2).join('').toUpperCase()||'?'}
+    function hl(s,q){if(!q)return s;const e=q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return String(s).replace(new RegExp(e,'gi'),m=>`<span class="hl">${m}</span>`)}
+    function updateStats(){
+      const n = Object.keys(checkins).length;
+      $('sn-total').textContent   = GUESTS.length;
+      $('sn-arrived').textContent = n;
+      $('sn-pending').textContent = GUESTS.length - n;
+    }
+    function showToast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+
+    // ── Render ───────────────────────────────────────────────────
+    function render() {
+      const q = $('search').value.trim().toLowerCase();
+      let list = GUESTS.map((g,i)=>({g,i}));
+      if (activeFilter==='not arrived') list=list.filter(({i})=>!isArrived(i));
+      else if (activeFilter!=='all')    list=list.filter(({g})=>(g.group||'').toLowerCase()===activeFilter.toLowerCase());
+      if (q) list=list.filter(({g})=>g.name.toLowerCase().includes(q)||g.code.toLowerCase().includes(q));
+      $('results-count').textContent = list.length ? `${list.length} guest${list.length!==1?'s':''}` : '';
+      const el = $('results');
+      if (!list.length){el.innerHTML=`<div class="empty"><div class="ico">${q?'🔎':'👥'}</div><p>${q?`No match for "${q}"`:'No guests in this group'}</p></div>`;return;}
+      el.innerHTML = list.map(({g,i})=>{
+        const ci=isArrived(i);
+        return `<div class="guest-card${ci?' arrived':''}" onclick="openModal(${i})">
+          <div class="avatar ${avClass(g.group)}">${initials(g.name)}</div>
+          <div class="guest-info">
+            <div class="guest-name">${hl(g.name,q)}</div>
+            <div class="guest-meta">
+              ${g.code?`<span class="code-badge">${hl(g.code,q)}</span>`:''}
+              ${g.group?`<span class="group-badge ${gbClass(g.group)}">${g.group}</span>`:''}
+              ${ci?`<span class="arrived-badge">✓ arrived</span>`:''}
+            </div>
+          </div>
+          <button class="check-btn${ci?' done':''}" onclick="toggle(event,${i})">✓</button>
+        </div>`;
+      }).join('');
+    }
+
+    // ── Check-in ─────────────────────────────────────────────────
+    function toggle(e, i) {
+      e.stopPropagation();
+      const arriving = !isArrived(i);
+      // Optimistic update
+      if (arriving) checkins[i] = { ts: Date.now() }; else delete checkins[i];
+      updateStats(); render();
+      send({ type: arriving ? 'checkin' : 'undo', idx: i });
+      showToast(arriving ? `✓ ${GUESTS[i].name} checked in` : `Removed ${GUESTS[i].name}`);
+    }
+
+    // ── Modal ─────────────────────────────────────────────────────
+    function openModal(i) {
+      const g=GUESTS[i]; currentIdx=i; const ci=isArrived(i);
+      const av=$('m-av'); av.textContent=initials(g.name); av.className='modal-avatar '+avClass(g.group);
+      $('m-name').textContent=g.name;
+      $('m-status').textContent=ci?'✓ Checked in — arrived':'Not yet checked in';
+      $('m-status').style.color=ci?'var(--green)':'var(--muted)';
+      $('m-fields').innerHTML=Object.entries(g.raw)
+        .filter(([k,v])=>k!==CONFIG.nameCol&&v&&v!=='#REF!')
+        .map(([k,v])=>`<div class="field-row"><span class="field-label">${k}</span><span class="field-val${k===CONFIG.codeCol?' code':''}">${v}</span></div>`)
+        .join('');
+      const btn=$('m-action'); btn.textContent=ci?'✕ Undo check-in':'✓ Check in'; btn.className=ci?'btn-undo':'btn-ci';
+      $('modal').classList.add('open');
+    }
+    $('m-close').onclick=()=>$('modal').classList.remove('open');
+    $('modal').onclick=e=>{if(e.target===$('modal'))$('modal').classList.remove('open')};
+    $('m-action').onclick=()=>{
+      const ci=isArrived(currentIdx);
+      if(ci)delete checkins[currentIdx]; else checkins[currentIdx]={ts:Date.now()};
+      updateStats(); render();
+      send({ type: ci?'undo':'checkin', idx: currentIdx });
+      showToast(!ci?`✓ ${GUESTS[currentIdx].name} checked in`:`Removed ${GUESTS[currentIdx].name}`);
+      $('modal').classList.remove('open');
+    };
+
+    boot();
+  </script>
 </body>
 </html>

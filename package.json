@@ -1,0 +1,12 @@
+{
+  "name": "guest-checkin",
+  "version": "1.0.0",
+  "description": "Event guest check-in app with real-time sync",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.17.0"
+  }
+}
