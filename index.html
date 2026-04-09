@@ -1,0 +1,711 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0
+    }
+
+    :root {
+        --bg: #0a0a0a;
+        --surface: #161616;
+        --surface2: #1e1e1e;
+        --border: #2a2a2a;
+        --gold: #c9a84c;
+        --gold-dim: #8a6e2e;
+        --text: #f0ede8;
+        --muted: #888;
+        --green: #4caf7d;
+        --red: #e05c5c;
+        --font: 'DM Sans', sans-serif;
+        --mono: 'DM Mono', monospace;
+    }
+
+    body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font);
+        min-height: 100vh;
+        padding: 0 0 60px;
+    }
+
+    #app {
+        max-width: 520px;
+        margin: 0 auto;
+        padding: 16px
+    }
+
+    .header {
+        text-align: center;
+        padding: 28px 0 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 24px
+    }
+
+    .header .crown {
+        font-size: 28px;
+        margin-bottom: 8px;
+        letter-spacing: 6px;
+        color: var(--gold)
+    }
+
+    .header h1 {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: .04em
+    }
+
+    .header p {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px
+    }
+
+    .upload-zone {
+        border: 1.5px dashed var(--border);
+        border-radius: 16px;
+        padding: 36px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        background: var(--surface)
+    }
+
+    .upload-zone:hover,
+    .upload-zone.drag {
+        border-color: var(--gold);
+        background: var(--surface2)
+    }
+
+    .upload-zone .icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+        color: var(--gold)
+    }
+
+    .upload-zone h2 {
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 6px
+    }
+
+    .upload-zone p {
+        font-size: 13px;
+        color: var(--muted)
+    }
+
+    .upload-zone input {
+        display: none
+    }
+
+    .col-map {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 16px;
+        margin-top: 16px;
+        border: 1px solid var(--border)
+    }
+
+    .col-map h3 {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: .08em
+    }
+
+    .col-map-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px
+    }
+
+    .col-map-row label {
+        font-size: 13px;
+        color: var(--muted);
+        width: 90px;
+        flex-shrink: 0
+    }
+
+    .col-map-row select {
+        flex: 1;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--text);
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: var(--font)
+    }
+
+    .col-map-row select:focus {
+        outline: none;
+        border-color: var(--gold)
+    }
+
+    .go-btn {
+        width: 100%;
+        margin-top: 14px;
+        background: var(--gold);
+        color: #0a0a0a;
+        border: none;
+        border-radius: 10px;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: var(--font);
+        cursor: pointer;
+        letter-spacing: .02em;
+        transition: opacity .15s
+    }
+
+    .go-btn:hover {
+        opacity: .88
+    }
+
+    .search-screen {
+        display: none
+    }
+
+    .search-wrap {
+        position: relative;
+        margin-bottom: 20px
+    }
+
+    .search-wrap .icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--muted);
+        font-size: 18px;
+        pointer-events: none
+    }
+
+    #search {
+        width: 100%;
+        background: var(--surface);
+        border: 1.5px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 14px 14px 44px;
+        font-size: 16px;
+        color: var(--text);
+        font-family: var(--font);
+        transition: border-color .2s
+    }
+
+    #search::placeholder {
+        color: var(--muted)
+    }
+
+    #search:focus {
+        outline: none;
+        border-color: var(--gold)
+    }
+
+    .stats-bar {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 18px
+    }
+
+    .stat {
+        flex: 1;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 10px 12px
+    }
+
+    .stat .n {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--gold)
+    }
+
+    .stat .l {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+        text-transform: uppercase;
+        letter-spacing: .06em
+    }
+
+    .results {}
+
+    .guest-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        cursor: pointer;
+        transition: border-color .15s, background .15s
+    }
+
+    .guest-card:hover {
+        border-color: var(--gold-dim);
+        background: var(--surface2)
+    }
+
+    .guest-card.checked-in {
+        border-left: 3px solid var(--green)
+    }
+
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--gold);
+        flex-shrink: 0;
+        text-transform: uppercase
+    }
+
+    .guest-info {
+        flex: 1;
+        min-width: 0
+    }
+
+    .guest-name {
+        font-size: 15px;
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis
+    }
+
+    .guest-meta {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+        flex-wrap: wrap
+    }
+
+    .badge {
+        font-size: 11px;
+        font-family: var(--mono);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 3px 8px;
+        color: var(--muted)
+    }
+
+    .badge.code {
+        color: var(--gold);
+        border-color: var(--gold-dim)
+    }
+
+    .check-btn {
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border);
+        background: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all .15s;
+        font-size: 16px
+    }
+
+    .check-btn:hover {
+        border-color: var(--green)
+    }
+
+    .check-btn.done {
+        background: var(--green);
+        border-color: var(--green);
+        color: #fff
+    }
+
+    .empty {
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--muted)
+    }
+
+    .empty .icon {
+        font-size: 36px;
+        margin-bottom: 12px
+    }
+
+    .reset-link {
+        display: block;
+        text-align: center;
+        margin-top: 24px;
+        font-size: 13px;
+        color: var(--muted);
+        cursor: pointer;
+        text-decoration: underline
+    }
+
+    .highlight {
+        background: rgba(201, 168, 76, .18);
+        border-radius: 3px;
+        padding: 0 2px
+    }
+
+    .modal-bg {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .8);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+        padding: 20px
+    }
+
+    .modal-bg.open {
+        display: flex
+    }
+
+    .modal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        width: 100%;
+        max-width: 380px
+    }
+
+    .modal h2 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px
+    }
+
+    .modal .sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-bottom: 20px
+    }
+
+    .modal-fields {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 20px
+    }
+
+    .field-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 12px;
+        background: var(--surface2);
+        border-radius: 8px
+    }
+
+    .field-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: .06em
+    }
+
+    .field-val {
+        font-size: 14px;
+        font-weight: 500
+    }
+
+    .field-val.code {
+        font-family: var(--mono);
+        color: var(--gold)
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 10px
+    }
+
+    .modal-actions button {
+        flex: 1;
+        padding: 12px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        font-family: var(--font);
+        cursor: pointer;
+        border: none;
+        transition: opacity .15s
+    }
+
+    .modal-actions button:hover {
+        opacity: .85
+    }
+
+    .btn-close {
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border) !important
+    }
+
+    .btn-checkin {
+        background: var(--green);
+        color: #fff
+    }
+
+    .btn-undo {
+        background: var(--red);
+        color: #fff
+    }
+</style>
+
+<div id="app">
+    <div class="header">
+        <div class="crown">✦ ✦ ✦</div>
+        <h1>Guest Check-In</h1>
+        <p>Search by name or access code</p>
+    </div>
+
+    <div id="upload-screen">
+        <div class="upload-zone" id="dropzone">
+            <div class="icon">📋</div>
+            <h2>Upload guest list</h2>
+            <p>Tap to select your Excel or CSV file</p>
+            <input type="file" id="file-input" accept=".xlsx,.xls,.csv">
+        </div>
+        <div class="col-map" id="col-map" style="display:none">
+            <h3>Map your columns</h3>
+            <div class="col-map-row">
+                <label>Guest name</label>
+                <select id="name-col"></select>
+            </div>
+            <div class="col-map-row">
+                <label>Access code</label>
+                <select id="code-col">
+                    <option value="">— none —</option>
+                </select>
+            </div>
+            <div class="col-map-row" id="extra-row" style="display:none">
+                <label>Extra info</label>
+                <select id="extra-col">
+                    <option value="">— none —</option>
+                </select>
+            </div>
+            <button class="go-btn" id="go-btn">Load Guest List →</button>
+        </div>
+    </div>
+
+    <div class="search-screen" id="search-screen">
+        <div class="stats-bar">
+            <div class="stat">
+                <div class="n" id="total-n">0</div>
+                <div class="l">Total guests</div>
+            </div>
+            <div class="stat">
+                <div class="n" id="checked-n">0</div>
+                <div class="l">Checked in</div>
+            </div>
+            <div class="stat">
+                <div class="n" id="remain-n">0</div>
+                <div class="l">Remaining</div>
+            </div>
+        </div>
+        <div class="search-wrap">
+            <span class="icon">🔍</span>
+            <input type="text" id="search" placeholder="Search name or code…" autocomplete="off" autocorrect="off"
+                spellcheck="false">
+        </div>
+        <div class="results" id="results"></div>
+        <span class="reset-link" id="reset-link">↩ Upload a different file</span>
+    </div>
+</div>
+
+<div class="modal-bg" id="modal">
+    <div class="modal">
+        <h2 id="m-name"></h2>
+        <div class="sub" id="m-sub"></div>
+        <div class="modal-fields" id="m-fields"></div>
+        <div class="modal-actions">
+            <button class="btn-close" id="m-close">Close</button>
+            <button class="btn-checkin" id="m-checkin">✓ Check in</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    let guests = [], cols = [], namCol = '', codCol = '', extCol = '', checkedIn = new Set(), currentIdx = -1;
+
+    const $ = id => document.getElementById(id);
+    const uploadScreen = $('upload-screen'), searchScreen = $('search-screen');
+    const colMap = $('col-map'), nameSel = $('name-col'), codeSel = $('code-col'), extSel = $('extra-col');
+
+    $('dropzone').onclick = () => $('file-input').click();
+    $('dropzone').ondragover = e => { e.preventDefault(); $('dropzone').classList.add('drag') };
+    $('dropzone').ondragleave = () => $('dropzone').classList.remove('drag');
+    $('dropzone').ondrop = e => { e.preventDefault(); $('dropzone').classList.remove('drag'); handleFile(e.dataTransfer.files[0]) };
+    $('file-input').onchange = e => handleFile(e.target.files[0]);
+
+    function handleFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            let data;
+            if (file.name.endsWith('.csv')) {
+                const text = e.target.result;
+                const wb = XLSX.read(text, { type: 'string' });
+                data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+            } else {
+                const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+            }
+            if (!data.length) return alert('No data found in file.');
+            guests = data;
+            cols = Object.keys(data[0]);
+            populateCols();
+        };
+        if (file.name.endsWith('.csv')) reader.readAsText(file);
+        else reader.readAsArrayBuffer(file);
+    }
+
+    function populateCols() {
+        [nameSel, codeSel, extSel].forEach(s => { while (s.options.length > 0) s.remove(0) });
+        codeSel.add(new Option('— none —', ''));
+        extSel.add(new Option('— none —', ''));
+        cols.forEach(c => {
+            nameSel.add(new Option(c, c));
+            codeSel.add(new Option(c, c));
+            extSel.add(new Option(c, c));
+        });
+        // Auto-detect
+        const lc = c => c.toLowerCase();
+        const nameGuess = cols.find(c => /(name|guest|full.?name|attendee)/i.test(c)) || cols[0];
+        const codeGuess = cols.find(c => /(code|access|ticket|id|ref)/i.test(c)) || '';
+        const extraGuess = cols.find(c => /(table|seat|type|category|vip|note)/i.test(c)) || '';
+        nameSel.value = nameGuess;
+        codeSel.value = codeGuess;
+        extSel.value = extraGuess;
+        if (extraGuess) $('extra-row').style.display = 'flex';
+        colMap.style.display = 'block';
+    }
+
+    $('go-btn').onclick = () => {
+        namCol = nameSel.value; codCol = codeSel.value; extCol = extSel.value;
+        if (!namCol) return alert('Please select the name column.');
+        checkedIn.clear();
+        uploadScreen.style.display = 'none';
+        searchScreen.style.display = 'block';
+        updateStats();
+        renderResults('');
+        $('search').focus();
+    };
+
+    $('search').oninput = e => renderResults(e.target.value.trim());
+    $('reset-link').onclick = () => {
+        uploadScreen.style.display = 'block';
+        searchScreen.style.display = 'none';
+        guests = []; checkedIn.clear();
+        $('file-input').value = '';
+        colMap.style.display = 'none';
+    };
+
+    function updateStats() {
+        $('total-n').textContent = guests.length;
+        $('checked-n').textContent = checkedIn.size;
+        $('remain-n').textContent = guests.length - checkedIn.size;
+    }
+
+    function hl(str, q) {
+        if (!q) return str;
+        const esc = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return String(str).replace(new RegExp(esc, 'gi'), m => `<span class="highlight">${m}</span>`);
+    }
+
+    function renderResults(q) {
+        const el = $('results');
+        const lq = q.toLowerCase();
+        let filtered = guests.map((g, i) => ({ g, i }));
+        if (lq) {
+            filtered = filtered.filter(({ g }) => {
+                const nm = String(g[namCol] || '').toLowerCase();
+                const cd = codCol ? String(g[codCol] || '').toLowerCase() : '';
+                return nm.includes(lq) || cd.includes(lq);
+            });
+        }
+        if (!filtered.length) {
+            el.innerHTML = `<div class="empty"><div class="icon">${q ? '🔎' : '👥'}</div><p>${q ? 'No guest found for "' + q + '"' : 'No guests loaded.'}</p></div>`;
+            return;
+        }
+        const limit = q ? filtered.length : Math.min(filtered.length, 40);
+        el.innerHTML = filtered.slice(0, limit).map(({ g, i }) => {
+            const name = g[namCol] || '—';
+            const code = codCol ? g[codCol] : '';
+            const extra = extCol ? g[extCol] : '';
+            const initials = String(name).split(' ').map(w => w[0] || '').slice(0, 2).join('').toUpperCase();
+            const ci = checkedIn.has(i);
+            return `<div class="guest-card${ci ? ' checked-in' : ''}" data-idx="${i}" onclick="openModal(${i})">
+      <div class="avatar">${initials}</div>
+      <div class="guest-info">
+        <div class="guest-name">${hl(name, q)}</div>
+        <div class="guest-meta">
+          ${code ? `<span class="badge code">${hl(code, q)}</span>` : ''}
+          ${extra ? `<span class="badge">${extra}</span>` : ''}
+          ${ci ? `<span class="badge" style="color:var(--green);border-color:var(--green)">✓ checked in</span>` : ''}
+        </div>
+      </div>
+      <button class="check-btn${ci ? ' done' : ''}" onclick="toggleCheck(event,${i})">✓</button>
+    </div>`;
+        }).join('');
+        if (filtered.length > limit && !q) {
+            el.innerHTML += `<div style="text-align:center;font-size:13px;color:var(--muted);padding:12px">Type to search ${filtered.length - limit} more guests…</div>`;
+        }
+    }
+
+    function toggleCheck(e, idx) {
+        e.stopPropagation();
+        if (checkedIn.has(idx)) checkedIn.delete(idx);
+        else checkedIn.add(idx);
+        updateStats();
+        renderResults($('search').value.trim());
+    }
+
+    function openModal(idx) {
+        const g = guests[idx]; currentIdx = idx;
+        const name = g[namCol] || '—';
+        const code = codCol ? g[codCol] : '';
+        const extra = extCol ? g[extCol] : '';
+        const ci = checkedIn.has(idx);
+        $('m-name').textContent = name;
+        $('m-sub').textContent = ci ? '✓ Checked in' : 'Not yet checked in';
+        $('m-sub').style.color = ci ? 'var(--green)' : 'var(--muted)';
+        const fields = [];
+        if (code) fields.push(`<div class="field-row"><span class="field-label">Access code</span><span class="field-val code">${code}</span></div>`);
+        if (extra) fields.push(`<div class="field-row"><span class="field-label">${extCol}</span><span class="field-val">${extra}</span></div>`);
+        cols.filter(c => c !== namCol && c !== codCol && c !== extCol).slice(0, 4).forEach(c => {
+            const v = g[c];
+            if (v) fields.push(`<div class="field-row"><span class="field-label">${c}</span><span class="field-val">${v}</span></div>`);
+        });
+        $('m-fields').innerHTML = fields.join('');
+        const btn = $('m-checkin');
+        btn.textContent = ci ? '✕ Undo check-in' : '✓ Check in';
+        btn.className = ci ? 'btn-undo' : 'btn-checkin';
+        $('modal').classList.add('open');
+    }
+
+    $('m-close').onclick = () => $('modal').classList.remove('open');
+    $('modal').onclick = e => { if (e.target === $('modal')) $('modal').classList.remove('open') };
+    $('m-checkin').onclick = () => {
+        if (checkedIn.has(currentIdx)) checkedIn.delete(currentIdx);
+        else checkedIn.add(currentIdx);
+        updateStats();
+        renderResults($('search').value.trim());
+        $('modal').classList.remove('open');
+    };
+</script>
